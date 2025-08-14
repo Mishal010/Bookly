@@ -165,3 +165,72 @@ export const disable2FA = async (req, res) => {
   await user.save();
   res.json({ message: "2FA disabled" });
 };
+
+// Refresh Access Token- POST:
+export const refresh = async (req, res) => {
+  const token = req.cookies?.refreshToken;
+  if (!token) return res.status(401).json("No refresh token");
+  jwt.verify(token, process.env.JWT_REFRESH_SECRET, (err, decoded) => {
+    if (err) return res.status(403).json({ message: "Invalid refresh token" });
+    const accessToken = jwt.sign(
+      { id: decoded.id, role: decoded.role },
+      process.env.JWT_SECRET,
+      { expiresIn: "15m" }
+    );
+    res.json({ accessToken });
+  });
+};
+
+// Logout - POST:
+export const logout = (req, res) => {
+  res.clearCookie("refreshToken", {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+    sameSite: "lax",
+  });
+
+  res.json({ message: "Logged out" });
+};
+
+// Reset Password Request - POST
+export const requestPasswordReset = async (req, res) => {
+  const { email } = req.body;
+  const user = await User.findOne({ email });
+  if (!user)
+    return res.json({
+      message: "If the email exists, reset link has been sent",
+    });
+  const token = crypto.randomBytes(32).toString("hex");
+  user.resetPasswordToken = token;
+  user.resetPasswordExpires = Date.now() + 15 * 60 * 1000;
+  await user.save();
+
+  const resetUrl = `${process.env.CLIENT_URL}/reset-password/${token}`;
+  await sendEmail({
+    to: email,
+    subject: "Password Reser Request",
+    html: `<p>Click <a href="${resetUrl}">this link</a> to reset your password. This link is only valid for 15 minutes.</p>`,
+  });
+  res.json({ message: "If the email exists, reset link has been sent" });
+};
+
+// Reset Password - POST:
+export const resetPassword = async (req, res) => {
+  const { token } = req.params;
+  const { newPassword } = req.body;
+
+  const user = await User.findOne({
+    resetPasswordToken: token,
+    resetPasswordExpires: { $gt: Date.now() },
+  });
+
+  if (!user)
+    return res.status(400).json({ message: "Invalid or expired token" });
+
+  user.password = await bcrypt.hash(newPassword, 10);
+  user.resetPasswordToken = undefined;
+  user.resetPasswordExpires = undefined;
+  await user.save();
+
+  res.json({ message: "Password reset successful" });
+};

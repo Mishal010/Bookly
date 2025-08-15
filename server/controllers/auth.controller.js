@@ -208,8 +208,8 @@ export const requestPasswordReset = async (req, res) => {
   const resetUrl = `${process.env.CLIENT_URL}/reset-password/${token}`;
   await sendEmail({
     to: email,
-    subject: "Password Reser Request",
-    html: `<p>Click <a href="${resetUrl}">this link</a> to reset your password. This link is only valid for 15 minutes.</p>`,
+    subject: "Password Reset Request",
+    html: `<p>Click <a href="${resetUrl}">here</a> to reset your password. This link is only valid for 15 minutes.</p>`,
   });
   res.json({ message: "If the email exists, reset link has been sent" });
 };

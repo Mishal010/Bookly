@@ -5,6 +5,7 @@ import connectDB from "./config/db.js";
 import cookieParser from "cookie-parser";
 
 import authRoutes from "./routes/auth.routes.js";
+import bookRoutes from "./routes/book.routes.js";
 
 dotenv.config();
 
@@ -21,6 +22,7 @@ app.get("/api/health", (req, res) => {
 
 // Route Middleware
 app.use("/api/auth", authRoutes);
+app.use("/api/books", bookRoutes);
 
 connectDB().then(() => {
   app.listen(PORT, () => {

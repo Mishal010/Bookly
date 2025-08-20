@@ -1,13 +1,42 @@
 import Book from "../models/Book.js";
+import { buildQueryOptions } from "../utils/queryHelper.js";
 
 // All books : GET
 export const getAllBooks = async (req, res) => {
   try {
-    const books = await Book.find(
-      {},
-      "title author category tags price coverImage averageRating"
-    ).sort({ createdAt: -1 });
-    res.status(200).json(books);
+    const { filters, options, page, limit, minPrice, maxPrice, search } =
+      buildQueryOptions(req.query);
+
+    if (search) {
+      const regex = new RegExp(search, "i");
+      filters.$or = [
+        { title: regex },
+        { author: regex },
+        { category: regex },
+        { tags: regex },
+      ];
+    }
+
+    if (minPrice || maxPrice) {
+      filters.price = {};
+      if (minPrice) filters.price.$gte = parseFloat(minPrice);
+      if (maxPrice) filters.price.$lte = parseFloat(maxPrice);
+    }
+
+    const books = await Book.find(filters)
+      .select(options.select)
+      .sort(options.sort)
+      .skip(options.skip)
+      .limit(options.limit);
+    const totalBooks = await Book.countDocuments(filters);
+
+    res.status(200).json({
+      success: true,
+      totalBooks,
+      totalPages: Math.ceil(totalBooks / limit),
+      currentPage: page,
+      books,
+    });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }

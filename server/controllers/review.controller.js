@@ -1,5 +1,6 @@
 import Book from "../models/Book.js";
 import Review from "../models/Review.js";
+import { buildQueryOptions } from "../utils/queryHelper.js";
 
 export const createReview = async (req, res) => {
   try {
@@ -30,8 +31,8 @@ export const createReview = async (req, res) => {
     // Average rating logic:
     const reviews = await Review.find({ book: bookId });
     const avgRating =
-      review.reduce((acc, r) => acc + r.rating, 0) / review.length;
-    book.averageRating = avgRating.toFixed(1);
+      reviews.reduce((acc, r) => acc + r.rating, 0) / review.length;
+    book.averageRating = Number(avgRating.toFixed(1));
     await book.save();
     res.status(201).json({ success: true, review });
   } catch (error) {
@@ -42,14 +43,36 @@ export const createReview = async (req, res) => {
 export const getReviews = async (req, res) => {
   try {
     const { minRating, maxRating, ...queryWithoutRating } = req.query;
+    const { bookId } = req.params;
+    // BookId is must:
+    if (!bookId) {
+      return res.status(400).json({ message: "bookId is required" });
+    }
+
     const { filters, options, page, limit } =
       buildQueryOptions(queryWithoutRating);
-
-    let filter = {};
+    filters.book = bookId;
     if (minRating || maxRating) {
+      filters.rating = filters.rating || {};
       if (minRating) filters.rating.$gte = parseInt(req.query.minRating);
       if (maxRating) filters.rating.$lte = parseInt(req.query.maxRating);
     }
+
+    const reviews = await Review.find(filters)
+      .populate("user", "name")
+      .populate("book", "title")
+      .sort(options.sort)
+      .skip(options.skip)
+      .limit(options.limit);
+
+    const reviewCount = await Review.countDocuments(filters);
+
+    res.status(200).json({
+      reviewCount,
+      totalPages: Math.ceil(reviewCount / limit),
+      currentPage: page,
+      reviews,
+    });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }

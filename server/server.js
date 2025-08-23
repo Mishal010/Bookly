@@ -7,6 +7,7 @@ import cookieParser from "cookie-parser";
 import authRoutes from "./routes/auth.routes.js";
 import bookRoutes from "./routes/book.routes.js";
 import reviewRoutes from "./routes/review.routes.js";
+import wishlistRoutes from "./routes/wishlist.routes.js";
 
 dotenv.config();
 
@@ -25,6 +26,7 @@ app.get("/api/health", (req, res) => {
 app.use("/api/auth", authRoutes);
 app.use("/api/books", bookRoutes);
 app.use("/api/books", reviewRoutes);
+app.use("/api/wishlist", wishlistRoutes);
 
 connectDB().then(() => {
   app.listen(PORT, () => {

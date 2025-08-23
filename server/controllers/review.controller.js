@@ -31,7 +31,7 @@ export const createReview = async (req, res) => {
     // Average rating logic:
     const reviews = await Review.find({ book: bookId });
     const avgRating =
-      reviews.reduce((acc, r) => acc + r.rating, 0) / review.length;
+      reviews.reduce((acc, r) => acc + r.rating, 0) / reviews.length;
     book.averageRating = Number(avgRating.toFixed(1));
     await book.save();
     res.status(201).json({ success: true, review });
@@ -48,6 +48,9 @@ export const getReviews = async (req, res) => {
     if (!bookId) {
       return res.status(400).json({ message: "bookId is required" });
     }
+
+    const book = await Book.findById(bookId);
+    if (!book) return res.status(404).json({ message: "Book not found" });
 
     const { filters, options, page, limit } =
       buildQueryOptions(queryWithoutRating);

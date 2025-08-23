@@ -5,6 +5,6 @@ const router = express.Router();
 
 router.get("/:bookId/reviews", getReviews);
 
-router.post("/:bookId/reviews", verifyToken(["user", "admin"]), createReview);
+router.post("/:bookId/review", verifyToken(["user", "admin"]), createReview);
 
 export default router;

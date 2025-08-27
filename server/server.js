@@ -8,6 +8,7 @@ import authRoutes from "./routes/auth.routes.js";
 import bookRoutes from "./routes/book.routes.js";
 import reviewRoutes from "./routes/review.routes.js";
 import wishlistRoutes from "./routes/wishlist.routes.js";
+import cartRoutes from "./routes/cart.routes.js";
 
 dotenv.config();
 
@@ -27,6 +28,7 @@ app.use("/api/auth", authRoutes);
 app.use("/api/books", bookRoutes);
 app.use("/api/books", reviewRoutes);
 app.use("/api/wishlist", wishlistRoutes);
+app.use("api/cart", cartRoutes);
 
 connectDB().then(() => {
   app.listen(PORT, () => {

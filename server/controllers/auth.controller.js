@@ -74,16 +74,16 @@ export const login = async (req, res) => {
     if (user.twoFactorEnabled) {
       const otp = generateOTP();
       user.twoFactorCode = otp;
-      user.twoFactorCodeExpires = Date.now() + 5 * 60 * 60 * 1000;
+      user.twoFactorCodeExpires = Date.now() + 10 * 60 * 1000;
       await user.save();
 
       await sendEmail({
         to: user.email,
         subject: "Your Bookly 2FA Code",
-        html: `<p>Your verification code is: <b>${otp}</b> (valid for 5 minutes)</p>`,
+        html: `<p>Your verification code is: <b>${otp}</b> (valid for 10 minutes)</p>`,
       });
       return res.json({
-        twoFactorRequired: true,
+        twoFactorEnabled: true,
         message: "2FA Code sent to email",
       });
     }
@@ -151,7 +151,7 @@ export const enable2FA = async (req, res) => {
     return res.json({ message: "2FA already enabled" });
 
   user.twoFactorEnabled = true;
-  await User.save();
+  await user.save();
   res.json({ message: "2FA enabled" });
 };
 
@@ -233,4 +233,48 @@ export const resetPassword = async (req, res) => {
   await user.save();
 
   res.json({ message: "Password reset successful" });
+};
+
+//
+export const profile = async (req, res) => {
+  try {
+    const user = await User.findById(req.user.id, {
+      name: 1,
+      email: 1,
+      twoFactorEnabled: 1,
+    }); // exclude password
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+    res.json(user);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+// Resend otp for 2FA: POST
+export const resendOTP = async (req, res) => {
+  try {
+    const { email } = req.body;
+    const user = await User.findOne({ email });
+    if (!user || !user.twoFactorEnabled) {
+      return res.status(400).json({ message: "Invalid request" });
+    }
+
+    // generate fresh OTP
+    const otp = generateOTP();
+    user.twoFactorCode = otp;
+    user.twoFactorCodeExpires = Date.now() + 10 * 60 * 1000; // 10 minutes
+    await user.save();
+
+    await sendEmail({
+      to: user.email,
+      subject: "Your Bookly 2FA Code (Resent)",
+      html: `<p>Your new verification code is: <b>${otp}</b> (valid for 10 minutes)</p>`,
+    });
+
+    res.json({ message: "OTP resent successfully" });
+  } catch (error) {
+    res.status(500).json({ message: "Something went wrong" });
+  }
 };

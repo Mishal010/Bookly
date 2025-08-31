@@ -14,7 +14,13 @@ dotenv.config();
 
 const PORT = process.env.PORT;
 const app = express();
-// app.use(cors());
+app.use(
+  cors({
+    origin: process.env.CLIENT_URL, // your React app
+    methods: ["GET", "POST", "PUT", "DELETE"],
+    credentials: true,
+  })
+);
 app.use(express.json());
 app.use(cookieParser());
 

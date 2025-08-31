@@ -3,9 +3,11 @@ import {
   enable2FA,
   login,
   logout,
+  profile,
   refresh,
   register,
   requestPasswordReset,
+  resendOTP,
   resetPassword,
   verify2FA,
 } from "../controllers/auth.controller.js";
@@ -17,9 +19,12 @@ const router = Router();
 
 router.use(cookieParser());
 
+router.get("/profile", verifyToken(), profile);
+
 router.post("/register", register);
 router.post("/login", login);
 router.post("/verify-2fa", verify2FA);
+router.post("/resend-2fa", resendOTP);
 
 router.post("/refresh", refresh);
 router.post("/logout", logout);

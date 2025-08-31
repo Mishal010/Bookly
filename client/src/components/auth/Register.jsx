@@ -1,8 +1,28 @@
-import React from "react";
+import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useAuthStore } from "../../store/userAuthStore";
 
 const Register = () => {
   const navigate = useNavigate();
+  const register = useAuthStore((state) => state.register);
+  const [email, setEmail] = useState("");
+  const [name, setName] = useState("");
+  const [password, setPassword] = useState("");
+  const error = useAuthStore((state) => state.error);
+  const loading = useAuthStore((state) => state.loading);
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    try {
+      await register({ name, email, password });
+      setName("");
+      setEmail("");
+      setPassword("");
+      navigate("/login");
+    } catch (error) {
+      console.error(error);
+    }
+  };
   return (
     <div className="flex h-[100vh] w-full">
       <div className="w-full hidden lg:inline-block lg:flex-1">
@@ -14,7 +34,10 @@ const Register = () => {
       </div>
 
       <div className="w-full flex flex-col items-center justify-center flex-1">
-        <form className="md:w-96 w-80 flex flex-col items-center justify-center">
+        <form
+          className="md:w-96 w-80 flex flex-col items-center justify-center"
+          onSubmit={handleSubmit}
+        >
           <h2 className="text-4xl text-gray-900 font-medium">Sign up</h2>
           <p className="text-sm text-gray-500/90 mt-3">
             Welcome to Bookly ! Please sign up to continue
@@ -56,6 +79,8 @@ const Register = () => {
 
             <input
               type="text"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
               placeholder="Username"
               className="bg-transparent text-gray-500/80 placeholder-gray-500/80 outline-none text-sm w-full h-full"
               required
@@ -79,6 +104,8 @@ const Register = () => {
             </svg>
             <input
               type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
               placeholder="Email id"
               className="bg-transparent text-gray-500/80 placeholder-gray-500/80 outline-none text-sm w-full h-full"
               required
@@ -100,6 +127,8 @@ const Register = () => {
             </svg>
             <input
               type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
               placeholder="Password"
               className="bg-transparent text-gray-500/80 placeholder-gray-500/80 outline-none text-sm w-full h-full"
               required
@@ -110,7 +139,7 @@ const Register = () => {
             type="submit"
             className="mt-8 w-full h-11 rounded-full text-white bg-indigo-500 hover:opacity-90 transition-opacity"
           >
-            Register
+            {loading ? "Registering..." : "Register"}
           </button>
           <p className="text-gray-500/90 text-sm mt-4">
             Already have an account?{" "}
@@ -121,6 +150,7 @@ const Register = () => {
               Sign in
             </a>
           </p>
+          {error && <p className="text-red-500 mt-2">{error}</p>}
         </form>
       </div>
     </div>

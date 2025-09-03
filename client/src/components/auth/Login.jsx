@@ -26,6 +26,10 @@ const Login = () => {
       console.error(error);
     }
   };
+
+  const handleReset = async () => {
+    navigate("/forgot-password");
+  };
   return (
     <div className="flex h-[100vh] w-full">
       <div className="w-full hidden lg:inline-block lg:flex-1">
@@ -121,7 +125,7 @@ const Login = () => {
                 Remember me
               </label>
             </div>
-            <a className="text-sm underline" href="#">
+            <a className="text-sm underline" onClick={handleReset}>
               Forgot password?
             </a>
           </div>

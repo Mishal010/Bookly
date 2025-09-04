@@ -13,7 +13,7 @@ const ForgotPassword = () => {
     setSuccess(null);
 
     try {
-      const res = await api.post("/auth/request-reset", { email });
+      const res = await api.post(`/auth/request-reset`, { email });
 
       if (res.status === 200) {
         setSuccess("Password reset email sent! Please check your inbox.");
@@ -52,8 +52,10 @@ const ForgotPassword = () => {
           Send Email
         </button>
 
-        {success && <p className="text-green-600 mt-2">{success}</p>}
-        {error && <p className="text-red-500 mt-2">{error}</p>}
+        {success && (
+          <p className="text-green-600 mt-2 text-center">{success}</p>
+        )}
+        {error && <p className="text-red-500 mt-2 text-center">{error}</p>}
 
         <p className="text-center mt-4">
           Don’t have an account?{" "}

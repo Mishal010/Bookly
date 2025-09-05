@@ -4,3 +4,6 @@
 * {
   font-family: "Comfortaa", sans-serif;
 }
+a.active {
+  color: blueviolet;
+}

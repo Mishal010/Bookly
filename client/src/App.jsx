@@ -11,6 +11,7 @@ import Home from "./pages/Home";
 import Verify2fa from "./components/auth/Verify2fa";
 import ForgotPassword from "./components/auth/ForgotPassword";
 import ResetPassword from "./components/auth/ResetPassword";
+import MainLayout from "./layout/MainLayout";
 
 function App() {
   const router = createBrowserRouter(
@@ -21,7 +22,9 @@ function App() {
         <Route path="/verify" element={<Verify2fa />} />
         <Route path="/forgot-password" element={<ForgotPassword />} />
         <Route path="/reset-password/:token" element={<ResetPassword />} />
-        <Route path="/" element={<Home />} />
+        <Route path="/" element={<MainLayout />}>
+          <Route index element={<Home />} />
+        </Route>
       </>
     )
   );

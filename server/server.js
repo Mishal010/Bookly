@@ -9,6 +9,7 @@ import bookRoutes from "./routes/book.routes.js";
 import reviewRoutes from "./routes/review.routes.js";
 import wishlistRoutes from "./routes/wishlist.routes.js";
 import cartRoutes from "./routes/cart.routes.js";
+import orderRoutes from "./routes/order.routes.js";
 
 dotenv.config();
 
@@ -35,6 +36,7 @@ app.use("/api/books", bookRoutes);
 app.use("/api/books", reviewRoutes);
 app.use("/api/wishlist", wishlistRoutes);
 app.use("api/cart", cartRoutes);
+app.use("/api/order", orderRoutes);
 
 connectDB().then(() => {
   app.listen(PORT, () => {
